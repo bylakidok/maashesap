@@ -1,0 +1,466 @@
+
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Maaş Hesaplama</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Century+Gothic:wght@400;700&display=swap');
+
+        body {
+            font-family: 'Century Gothic', Arial, sans-serif;
+            background: url("https://codetheworld.io/wp-content/uploads/2024/09/hero-bg.jpg") no-repeat center center fixed;
+            background-size: cover;
+            color: #333;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+        }
+        .container {
+            background: rgba(255, 255, 255, 0.3);
+            backdrop-filter: blur(15px) saturate(180%);
+            -webkit-backdrop-filter: blur(15px) saturate(180%);
+            border-radius: 20px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+            padding: 20px;
+            max-width: 800px;
+            width: 100%;
+            margin: auto;
+            overflow-y: auto;
+            height: 90vh;
+            display: flex;
+            flex-direction: column;
+        }
+        h1 {
+            text-align: center;
+            color: #ffffff;
+            margin-bottom: 20px;
+            font-size: 1.8em;
+        }
+        form {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            justify-content: space-between;
+        }
+        .form-group {
+            width: calc(33% - 15px);
+            position: relative;
+        }
+        label {
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #ffffff;
+            font-size: 0.9em;
+            display: block;
+        }
+        input, select {
+            width: 100%;
+            padding: 10px;
+            border-radius: 20px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            box-sizing: border-box;
+            font-size: 0.9em;
+            border: 2px solid #ffffff;
+            background: rgba(255, 255, 255, 0.6);
+        }
+        button {
+            padding: 15px;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 1em;
+            width: calc(32% - 10px);
+            margin-top: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .hesapla {
+            background: linear-gradient(to right, #28a745, #34d058);
+        }
+        .temizle {
+            background: linear-gradient(to right, #d9534f, #ff5c5c);
+        }
+        .yazdir {
+            background: linear-gradient(to right, #007bff, #00aaff);
+        }
+        .result {
+            margin-top: 20px;
+            font-size: 1.2em;
+            text-align: center;
+            color: #28a745;
+            font-weight: bold;
+        }
+        .detailed-result {
+            margin-top: 20px;
+            font-size: 1em;
+            color: #ffffff;
+            font-weight: normal;
+            text-align: left;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 0.8em;
+            color: #ffffff;
+        }
+        .alert {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.8);
+            color: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
+            display: none;
+            z-index: 1000;
+        }
+        .alert-icon {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Maaş Hesaplama</h1>
+        <form id="salaryForm">
+            <!-- Form Grupları -->
+            <div class="form-group" style="width: calc(50% - 15px); margin: 0 auto;">
+                <label for="tcKimlik">T.C. Kimlik No:</label>
+                <input type="text" id="tcKimlik" oninput="this.value = this.value.replace(/[^0-9]/g, '')" maxlength="11">
+            </div>
+            <div class="form-group" style="width: calc(50% - 15px); margin: 0 auto;">
+                <label for="adSoyad">Adı Soyadı:</label>
+                <input type="text" id="adSoyad">
+            </div>
+            <div class="form-group">
+                <label for="unvan">Unvan:</label>
+                <select id="unvan" required onchange="unvanDegisti()">
+                    <option value="Lütfen Seçim Yapın">Lütfen Seçim Yapın</option>
+                    <option value="alet-operatoru-1">Alet Operatörü 1</option>
+                    <option value="alet-operatoru-2">Alet Operatörü 2</option>
+                    <option value="duz-isci">Düz İşçi</option>
+                    <option value="ekipbasi">Ekipbaşı</option>
+                    <option value="kalifiye-kaynakci-ustasi">Kalifiye Kaynakçı Ustası</option>
+                    <option value="kalifiyeli-usta">Kalifiyeli Usta</option>
+                    <option value="kaynakci-ekipbasi">Kaynakçı Ekipbaşı</option>
+                    <option value="kaynakci-ustasi">Kaynakçı Ustası</option>
+                    <option value="usta">Usta</option>
+                    <option value="yardimci">Yardımcı</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="gunlukUcret">7,5 Günlük ücret:</label>
+                <input type="number" id="gunlukUcret" readonly>
+            </div>
+            <div class="form-group">
+                <label for="saatlikUcret">Saatlik ücret:</label>
+                <input type="number" id="saatlikUcret" readonly>
+            </div>
+            <div class="form-group">
+                <label for="normalGun">Normal Gün:</label>
+                <input type="number" id="normalGun">
+            </div>
+            <div class="form-group">
+                <label for="pazarCalismasi">Pazar Çalışması:</label>
+                <input type="number" id="pazarCalismasi">
+            </div>
+            <div class="form-group">
+                <label for="haftaTatili">Hafta Tatili:</label>
+                <input type="number" id="haftaTatili">
+            </div>
+            <div class="form-group">
+                <label for="fazlaMesai">Fazla Mesai:</label>
+                <input type="number" id="fazlaMesai">
+            </div>
+            <div class="form-group">
+                <label for="resmiTatilCalismasi">Resmi Tatil Çalışması:</label>
+                <input type="number" id="resmiTatilCalismasi">
+            </div>
+            <div class="form-group">
+                <label for="diniBayramCalismasi">Dini Bayram Çalışması:</label>
+                <input type="number" id="diniBayramCalismasi">
+            </div>
+            <div class="form-group">
+                <label for="resmiTatil">Resmi Tatil:</label>
+                <input type="number" id="resmiTatil">
+            </div>
+            <div class="form-group">
+                <label for="yillikIzin">Yıllık İzin:</label>
+                <input type="number" id="yillikIzin">
+            </div>
+            <div class="form-group">
+                <label for="yevmiye">Yevmiye:</label>
+                <input type="number" id="yevmiye">
+            </div>
+            <div class="form-group">
+                <label for="mazeretliIzin">Mazeretli İzin:</label>
+                <input type="number" id="mazeretliIzin">
+            </div>
+            <div class="form-group">
+                <label for="kamptaBekleme">Kampta Bekleme:</label>
+                <input type="number" id="kamptaBekleme">
+            </div>
+            <div class="form-group">
+                <label for="refakatci">Refakatçı:</label>
+                <input type="number" id="refakatci">
+            </div>            
+            <button type="button" class="hesapla" onclick="hesapla()">
+                 Hesapla
+            </button>
+            <button type="button" class="temizle" onclick="temizle()">
+                 Temizle
+            </button>
+            <button type="button" class="yazdir" onclick="yazdir()">
+                 Yazdır
+            </button>
+            <style>
+                @media print {
+                    body * {
+                        visibility: hidden;
+                    }
+                    .container, .container * {
+                        visibility: visible;
+                    }
+                    .container {
+                        position: absolute;
+                        top: 0;
+                        left: 0;
+                        width: 100%;
+                    }
+                }
+            </style>
+        </form>
+
+        <div class="result" id="result"></div>
+        <div class="detailed-result" id="detailedResult"></div>
+        <div class="footer">&copy; Powered by Murat Nas</div>
+    </div>
+
+    <div class="alert" id="tcKimlikAlert">
+        <div class="alert-icon">⚠️</div>
+        <div class="alert-message" id="alertMessage"></div>
+    </div>
+
+    <script>
+        const komikMesajlar = [
+            "Bir şeyler ters gitti... galiba uzaylılar sistemimizi ele geçirdi!",
+            "Hata oluştu! Kahvem bitti, biraz daha kahve yapmam lazım.",
+            "Özür dileriz, sistemimiz şu anda \"panik modunda\". Lütfen biraz sonra tekrar deneyin.",
+            "Bu hatayı düzeltmek için bir kediye ihtiyaç var.",
+            "Sistemimizde bir kedi yavrusu sıkıştı gibi görünüyor. Lütfen daha sonra tekrar deneyin.",
+            "Bu sayfayı bulmak için bir zaman makinesi gerekiyor olabilir.",
+            "Bu hata mesajı, bu hatanın ne kadar komik olduğunu göstermek için özel olarak tasarlanmıştır.",
+            "Sistemimiz şu anda \"koca bir kahkaha atıyor\" modunda.",
+            "Bu hata, evrenin dengesini bozmuş olabilir. Lütfen yardım edin!",
+            "Sistemimiz biraz fazla \"cheesecake\" yedi.",
+            "Bu hata, bir sihirbazın şapkasından çıkan tavşan kadar beklenmedik.",
+            "Sistemimiz şu anda \"modası geçmiş\" bir hata yaşıyor.",
+            "Bu hata, bir dinozorun bilgisayar klavyesine basması gibi bir şey.",
+            "Hard diskiniz çok fazla parti yapıyor.",
+            "İşletim sisteminiz, bir buçuk yaşındaki bir çocuğun çizimlerine benziyor.",
+            "RAM'iniz tükendi! Acıktılar ve biraz atıştırmalık istiyorlar.",
+            "Internet bağlantınız, bir kediyle kovalamaca oynuyor gibi.",
+            "Tarayıcınız, bir zaman yolcusu gibi geçmişe gitmeye çalışıyor.",
+            "Yazıcınız, mürekkebi bittiği için şiir yazmaya başladı.",
+            "Klavyeniz, tuşlara basmayı bıraktı ve dans etmeye başladı.",
+            "Fare imleniz, peynir kokusu almış gibi dört bir yana dağılıyor.",
+            "Bilgisayarınız, bir bilim kurgu filmindeki uzay gemisine dönüştü.",
+            "Sisteminiz, bir kara deliğe düşmüş gibi görünüyor.",
+            "Bu sayfa, bir hayalet tarafından gizlendi.",
+            "Aradığınız sayfa, tatile çıktı.",
+            "Bu sayfayı bulmak için bir hazine haritasına ihtiyacınız var.",
+            "Bu sayfa, bir sihirli kutusunda saklı.",
+            "Bu sayfa, bir zaman kapsülünde sıkışıp kaldı.",
+            "Bu sayfa, bir uzaylı gemisine kaçırıldı.",
+            "Bu sayfa, bir kedi tarafından çizildi.",
+            "Bu sayfa, bir dinozor tarafından çiğnendi.",
+            "Bu sayfa, bir sihirbazın şapkasından çıktı.",
+            "Bu sayfa, bir zaman makinesiyle gelecekten geldi.",
+            "Bu hatayı düzeltmek için bir sihirbaz değilim, sadece bir bilgisayarım var.",
+            "Lütfen, bu düğmeye tekrar basmayın! Patlayabilir!",
+            "Bu butona tıklamanız çok beklenmedik bir durum.",
+            "Bu kadar hızlı tıklamayın, bilgisayarım başım dönüyor!",
+            "Bu işlemi yaparken dikkatli olun, yanlışlıkla evreni yok edebilirsiniz.",
+            "Bu hata mesajını okuduğunuz için teşekkür ederiz. Şimdi lütfen tekrar deneyin.",
+            "Bu hata, sizin için özel olarak tasarlandı.",
+            "Bu hata, evrenin en büyük sırrını ortaya çıkarabilir.",
+            "Bu hata, bir şaka olabilir mi?",
+            "Bu hata, bir sanat eseri gibi.",
+            "Sistemimiz bir kahve molası veriyor. Lütfen bekleyin!",
+            "Bu hata, Matrix'te bir aksaklığa benziyor.",
+            "Kablolarımız birbirine dolanmış olabilir, çözmeye çalışıyoruz!",
+            "Hata: Kodlarımı çözen hamster yorgun düştü.",
+            "Uyarı: Sistemimiz şu anda dondurma yiyor, lütfen bekleyin.",
+            "Sistemimiz, bulutlara uçtu ve kayboldu. Geri getirmeye çalışıyoruz.",
+            "Kediniz klavyede mi oturuyor? Bu hatanın sebebi bu olabilir.",
+            "Sistem şimdilik tatilde, ancak sizi seviyor!",
+            "Kedilerin çoğu bu hatayı sevmez, ancak biz yapabilecek bir şey bulamıyoruz.",
+            "Bu hata, asla olmaması gereken türden bir hata.",
+            "Sistemimiz aşırı dozda çikolata yediği için bayıldı.",
+            "Hata: Klavyedeki tuşlar birbirine aşık oldu, işbirliği yapmıyorlar.",
+            "Sistem şu anda meditasyon yapıyor, lütfen derin nefes alın ve tekrar deneyin.",
+            "Bu hatayı çözerken bir uzay gemisi kadar karmaşığız.",
+            "Ağ bağlantınız örümcek ağına dolanmış olabilir, bir göz atın!",
+            "Hata: Kodum şu anda ayda, internet bağlantısı biraz zayıf.",
+            "Sunucularımız kaçmaya çalıştı, ancak onları geri getirdik.",
+            "Hata: Sistem, kahveyle çalışıyordu ve kahve bitti.",
+            "Sunucu şu anda yoga yapıyor, birazdan dönecek.",
+            "Kediler bu hatayı sevmiyor, biz de sevmiyoruz. Ama işte buradayız.",
+            "Sistemimiz günün modasına uygun değil, bu yüzden hata veriyor olabilir.",
+            "Hata: Sistemimiz şu anda kedilerle oynamakla meşgul, lütfen bekleyin.",
+            "Yazıcı mürekkebi bitmiş olabilir, ama bu bir web hatası. İlginç, değil mi?",
+            "Bu hata sizi şaşırtabilir, bizi de şaşırtıyor.",
+            "Hata, bir uzaylı tarafından kaçırıldı, ancak geri alacağız!"
+        ];
+
+        function unvanDegisti() {
+            var unvan = document.getElementById('unvan').value;
+            var gunlukUcret = 0;
+            var saatlikUcret = 0;
+
+            switch(unvan) {
+                case 'alet-operatoru-1':
+                    gunlukUcret = 753.98;
+                    saatlikUcret = 100.53;
+                    break;
+                case 'alet-operatoru-2':
+                    gunlukUcret = 746.04;
+                    saatlikUcret = 99.47;
+                    break;
+                case 'duz-isci':
+                    gunlukUcret = 566.81;
+                    saatlikUcret = 75.57;
+                    break;
+                case 'ekipbasi':
+                    gunlukUcret = 757.50;
+                    saatlikUcret = 101;
+                    break;
+                case 'kalifiye-kaynakci-ustasi':
+                    gunlukUcret = 795;
+                    saatlikUcret = 106;
+                    break;
+                case 'kalifiyeli-usta':
+                    gunlukUcret = 741;
+                    saatlikUcret = 98.8;
+                    break;
+                case 'kaynakci-ekipbasi':
+                    gunlukUcret = 846.57;
+                    saatlikUcret = 112.88;
+                    break;
+                case 'kaynakci-ustasi':
+                    gunlukUcret = 709.50;
+                    saatlikUcret = 94.6;
+                    break;
+                case 'usta':
+                    gunlukUcret = 657;
+                    saatlikUcret = 87.6;
+                    break;
+                case 'yardimci':
+                    gunlukUcret = 592.50;
+                    saatlikUcret = 79;
+                    break;
+            }
+
+            document.getElementById('gunlukUcret').value = gunlukUcret;
+            document.getElementById('saatlikUcret').value = saatlikUcret;
+        }
+
+        document.getElementById('tcKimlik').addEventListener('blur', function() {
+            var tcKimlik = this.value;
+            if (tcKimlik.length > 0 && tcKimlik.length !== 11) {
+                var alertBox = document.getElementById('tcKimlikAlert');
+                var randomIndex = Math.floor(Math.random() * komikMesajlar.length);
+                document.getElementById('alertMessage').innerText = komikMesajlar[randomIndex];
+                alertBox.style.display = 'block';
+                setTimeout(function() {
+                    alertBox.style.display = 'none';
+                }, 5000);
+            }
+        });
+
+        function hesapla() {
+            var tcKimlik = document.getElementById('tcKimlik').value;
+            var adSoyad = document.getElementById('adSoyad').value;
+            var saatlikUcret = parseFloat(document.getElementById('saatlikUcret').value) || 0;
+            var gunlukUcret = parseFloat(document.getElementById('gunlukUcret').value) || 0;
+            var normalGun = parseFloat(document.getElementById('normalGun').value) || 0;
+            var pazarCalismasi = parseFloat(document.getElementById('pazarCalismasi').value) || 0;
+            var haftaTatili = parseFloat(document.getElementById('haftaTatili').value) || 0;
+            var fazlaMesai = parseFloat(document.getElementById('fazlaMesai').value) || 0;
+            var resmiTatilCalismasi = parseFloat(document.getElementById('resmiTatilCalismasi').value) || 0;
+            var diniBayramCalismasi = parseFloat(document.getElementById('diniBayramCalismasi').value) || 0;
+            var resmiTatil = parseFloat(document.getElementById('resmiTatil').value) || 0;
+            var yillikIzin = parseFloat(document.getElementById('yillikIzin').value) || 0;
+            var yevmiye = parseFloat(document.getElementById('yevmiye').value) || 0;
+            var mazeretliIzin = parseFloat(document.getElementById('mazeretliIzin').value) || 0;
+            var kamptaBekleme = parseFloat(document.getElementById('kamptaBekleme').value) || 0;
+            var refakatci = parseFloat(document.getElementById('refakatci').value) || 0;
+
+            // Hesaplama detayları
+            var normalGunSonuc = normalGun * 9.75 * saatlikUcret;
+            var pazarCalismasiSonuc = pazarCalismasi * 11.25 * saatlikUcret;
+            var haftaTatiliSonuc = haftaTatili * gunlukUcret;
+            var fazlaMesaiSonuc = fazlaMesai * 1.5 * saatlikUcret;
+            var resmiTatilCalismasiSonuc = resmiTatilCalismasi * 11.25 * saatlikUcret;
+            var diniBayramCalismasiSonuc = diniBayramCalismasi * 2 * gunlukUcret;
+            var resmiTatilSonuc = resmiTatil * gunlukUcret;
+            var yillikIzinSonuc = yillikIzin * gunlukUcret;
+            var yevmiyeSonuc = yevmiye * gunlukUcret;
+            var mazeretliIzinSonuc = mazeretliIzin * gunlukUcret;
+            var kamptaBeklemeSonuc = kamptaBekleme * gunlukUcret;
+            var refakatciSonuc = refakatci * gunlukUcret;
+
+            // Toplam ücreti hesapla
+            var toplamUcret = normalGunSonuc + pazarCalismasiSonuc + haftaTatiliSonuc + fazlaMesaiSonuc + resmiTatilCalismasiSonuc + diniBayramCalismasiSonuc + resmiTatilSonuc + yillikIzinSonuc + yevmiyeSonuc + mazeretliIzinSonuc + kamptaBeklemeSonuc + refakatciSonuc;
+
+            // Detaylı sonuçları göster
+            document.getElementById('result').innerText = `Hesaplanan toplam ücret: ${toplamUcret.toFixed(2)} TL`;
+            document.getElementById('detailedResult').innerHTML = `
+                <p><strong>T.C. Kimlik No:</strong> ${tcKimlik}</p>
+                <p><strong>Adı Soyadı:</strong> ${adSoyad}</p>
+                <ul>
+                    <li>Normal Gün Ücreti: ${normalGunSonuc.toFixed(2)} TL</li>
+                    <li>Pazar Çalışması Ücreti: ${pazarCalismasiSonuc.toFixed(2)} TL</li>
+                    <li>Hafta Tatili Ücreti: ${haftaTatiliSonuc.toFixed(2)} TL</li>
+                    <li>Fazla Mesai Ücreti: ${fazlaMesaiSonuc.toFixed(2)} TL</li>
+                    <li>Resmi Tatil Çalışması Ücreti: ${resmiTatilCalismasiSonuc.toFixed(2)} TL</li>
+                    <li>Dini Bayram Çalışması Ücreti: ${diniBayramCalismasiSonuc.toFixed(2)} TL</li>
+                    <li>Resmi Tatil Ücreti: ${resmiTatilSonuc.toFixed(2)} TL</li>
+                    <li>Yıllık İzin Ücreti: ${yillikIzinSonuc.toFixed(2)} TL</li>
+                    <li>Yevmiye Ücreti: ${yevmiyeSonuc.toFixed(2)} TL</li>
+                    <li>Mazeretli İzin Ücreti: ${mazeretliIzinSonuc.toFixed(2)} TL</li>
+                    <li>Kampta Bekleme Ücreti: ${kamptaBeklemeSonuc.toFixed(2)} TL</li>
+                    <li>Refakatçı Ücreti: ${refakatciSonuc.toFixed(2)} TL</li>
+                </ul>
+            `;
+        }
+
+        function temizle() {
+            document.getElementById('salaryForm').reset();
+            document.getElementById('gunlukUcret').value = '';
+            document.getElementById('saatlikUcret').value = '';
+            document.getElementById('result').innerText = '';
+            document.getElementById('detailedResult').innerHTML = '';
+        }
+
+        function yazdir() {
+            window.print();
+        }
+    </script>
+
+</body>
+</html>
